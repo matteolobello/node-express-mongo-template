@@ -10,7 +10,7 @@
 8. CORS
 9. BasicAuth-protected directories
 10. Live Server with Hot Reloading
-11. Deploy on Docker
+11. Docker + Docker Compose
 
 ### Run live-server (dev mode)
 `npm run dev`
