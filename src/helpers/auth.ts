@@ -1,16 +1,15 @@
 import * as bcrypt from "bcryptjs"
 import * as jsonWebToken from "jsonwebtoken"
 import * as sanitizer from "sanitize-html"
-import * as Database from "./db"
-import { Errors } from "./constants"
+import * as Database from "../db/db"
+import { Errors, JWT_CODE_EXPIRATION, SECRET_JWT_CODE } from "./constants"
 
 interface TokenPayload {
-	_id: string;
+	_id: string
 	email: string
 }
 
 export default class AuthManager {
-
 	private static instance: AuthManager = null
 
 	public static getInstance() {
@@ -52,7 +51,10 @@ export default class AuthManager {
 						if (!bcrypt.compareSync(password, user.password)) {
 							reject(Errors.BAD_AUTHENTICATION)
 						} else {
-							const token = this.generateToken({ _id: user._id, email: user.email })
+							const token = this.generateToken({
+								_id: user._id,
+								email: user.email
+							})
 							resolve({ token, userType: user.userType })
 						}
 					}
@@ -96,17 +98,17 @@ export default class AuthManager {
 		})
 	}
 
-	generateToken(tokenPayload: TokenPayload, exp = process.env.JWT_CODE_EXPIRATION) {
+	generateToken(tokenPayload: TokenPayload, exp = JWT_CODE_EXPIRATION) {
 		return jsonWebToken.sign(
 			{ _id: tokenPayload._id, email: tokenPayload.email },
-			process.env.SECRET_JWT_CODE,
+			SECRET_JWT_CODE,
 			{ expiresIn: exp }
 		)
 	}
 
 	private decodeJWT(token: string): any {
 		try {
-			return jsonWebToken.verify(token, process.env.SECRET_JWT_CODE)
+			return jsonWebToken.verify(token, SECRET_JWT_CODE)
 		} catch (e) {
 			return null
 		}

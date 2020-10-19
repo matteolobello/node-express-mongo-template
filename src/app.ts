@@ -1,21 +1,26 @@
 import * as dotenv from "dotenv"
 dotenv.config()
 
+import * as bodyParser from "body-parser"
 import * as express from "express"
 import * as fileSystem from "fs"
-import * as bodyParser from "body-parser"
 import * as http from "http"
 import * as https from "https"
 import * as morganBody from "morgan-body"
-
-import corsMiddleware from "./middlewares/cors-middleware"
+import {
+	DEBUG,
+	SERVER_PORT,
+	SERVER_SSL_CERTIFICATE_PATH,
+	SERVER_SSL_KEY_PATH,
+	MAX_LOGS_CHARS
+} from "./helpers/constants"
+import rootController from "./controllers/get/root-controller"
+import forgotPasswordController from "./controllers/post/forgot-password-controller"
+import forgotPasswordUpdateController from "./controllers/post/forgot-password-update-controller"
+import loginController from "./controllers/post/login-controller"
+import signUpController from "./controllers/post/signup-controller"
 import basicAuthMiddleware from "./middlewares/basic-auth-middleware"
-
-import rootController from "./controllers/root-controller"
-import loginController from "./controllers/login-controller"
-import signUpController from "./controllers/signup-controller"
-import forgotPasswordController from "./controllers/forgot-password-controller"
-import forgotPasswordUpdateController from "./controllers/forgot-password-update-controller"
+import corsMiddleware from "./middlewares/cors-middleware"
 
 const app = express()
 app.use(bodyParser.json())
@@ -23,17 +28,21 @@ app.use(corsMiddleware)
 app.use(basicAuthMiddleware)
 app.use("/visual/admin", express.static(__dirname + "/static/admin"))
 
-if (process.env.DEBUG) {
-	morganBody(app, { maxBodyLength: Number.MAX_VALUE })
+if (DEBUG) {
+	morganBody(app, { maxBodyLength: MAX_LOGS_CHARS })
 }
 
-const server = process.env.SERVER_PORT == "443"
-	? https.createServer({
-		key: fileSystem.readFileSync(process.env.SERVER_SSL_KEY_PATH, "utf8"),
-		cert: fileSystem.readFileSync(process.env.SERVER_SSL_CERTIFICATE_PATH, "utf8")
-	}, app)
-	: http.createServer(app)
-const serverPort = process.env.SERVER_PORT || 80
+const server =
+	SERVER_PORT == "443"
+		? https.createServer(
+				{
+					key: fileSystem.readFileSync(SERVER_SSL_KEY_PATH, "utf8"),
+					cert: fileSystem.readFileSync(SERVER_SSL_CERTIFICATE_PATH, "utf8")
+				},
+				app
+		  )
+		: http.createServer(app)
+const serverPort = SERVER_PORT || 80
 server.listen(serverPort, () => {
 	console.log(`Running server on port ${serverPort}`)
 })
