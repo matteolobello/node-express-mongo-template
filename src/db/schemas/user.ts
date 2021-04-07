@@ -1,18 +1,15 @@
-import * as mongoose from "mongoose"
+import { prop } from "@typegoose/typegoose"
 
-export default new mongoose.Schema(
-	{
-		email: {
-			type: String,
-			unique: true,
-			required: true,
-			lowercase: true,
-			trim: true
-		},
-		password: {
-			type: String,
-			required: true
-		}
-	},
-	{ collection: "users" }
-)
+export default class User {
+	@prop({
+		type: String,
+		unique: true,
+		required: true,
+		lowercase: true,
+		trim: true
+	})
+	public email: string
+
+	@prop({ type: String, required: true })
+	public password: string
+}

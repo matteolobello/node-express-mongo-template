@@ -72,10 +72,16 @@ export default class AuthManager {
 	fetchUserByHeaderToken(req: any) {
 		if (req.headers && req.headers.authorization) {
 			const authorization = sanitizer(req.headers.authorization)
-			return this.fetchUserByToken(authorization)
-		} else {
-			return new Promise((_, rej) => rej(Errors.AUTH_TOKEN_NOT_FOUND))
+			if (!authorization.includes("Bearer")) {
+				return
+			}
+
+			const [_, token] = authorization.split("Bearer")
+
+			return this.fetchUserByToken(token.trim())
 		}
+
+		return Promise.reject(Errors.AUTH_TOKEN_NOT_FOUND)
 	}
 
 	fetchUserByToken(token: string) {
@@ -99,11 +105,7 @@ export default class AuthManager {
 	}
 
 	generateToken(tokenPayload: TokenPayload, exp = JWT_CODE_EXPIRATION) {
-		return jsonWebToken.sign(
-			{ _id: tokenPayload._id, email: tokenPayload.email },
-			SECRET_JWT_CODE,
-			{ expiresIn: exp }
-		)
+		return jsonWebToken.sign(tokenPayload, SECRET_JWT_CODE, { expiresIn: exp })
 	}
 
 	private decodeJWT(token: string): any {

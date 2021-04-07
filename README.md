@@ -6,11 +6,12 @@
 4. Bcrypt
 5. SSL
 6. MongoDB
-7. Login + Sign Up + Forgot Password
-8. CORS
-9. BasicAuth-protected directories
-10. Live Server with Hot Reloading
-11. Docker + Docker Compose
+7. TypeGoose
+8. Login + Sign Up + Forgot Password
+9. CORS
+10. BasicAuth-protected directories
+11. Live Server with Hot Reloading
+12. Docker + Docker Compose
 
 ### Run live-server (dev mode)
 `npm run dev`

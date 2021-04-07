@@ -1,9 +1,10 @@
 {
-    "compilerOptions": {
-        "outDir": "./dist"
-    },
-    "inclue": [
-        "/src/*"
-    ],
-    "exclude": []
+	"compilerOptions": {
+        "rootDir": "./src",
+		"outDir": "./dist",
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true
+	},
+	"include": ["/src/*"],
+	"exclude": []
 }

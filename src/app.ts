@@ -1,35 +1,52 @@
 import * as dotenv from "dotenv"
 dotenv.config()
 
-import * as bodyParser from "body-parser"
 import * as express from "express"
+import * as expressWinston from "express-winston"
 import * as fileSystem from "fs"
 import * as http from "http"
 import * as https from "https"
-import * as morganBody from "morgan-body"
+import * as winston from "winston"
 import {
 	DEBUG,
 	SERVER_PORT,
 	SERVER_SSL_CERTIFICATE_PATH,
-	SERVER_SSL_KEY_PATH,
-	MAX_LOGS_CHARS
+	SERVER_SSL_KEY_PATH
 } from "./helpers/constants"
-import rootController from "./controllers/get/root-controller"
-import forgotPasswordController from "./controllers/post/forgot-password-controller"
-import forgotPasswordUpdateController from "./controllers/post/forgot-password-update-controller"
-import loginController from "./controllers/post/login-controller"
-import signUpController from "./controllers/post/signup-controller"
 import basicAuthMiddleware from "./middlewares/basic-auth-middleware"
 import corsMiddleware from "./middlewares/cors-middleware"
+import rootController from "./routes/get/root-controller"
+import forgotPasswordController from "./routes/post/forgot-password-controller"
+import forgotPasswordUpdateController from "./routes/post/forgot-password-update-controller"
+import loginController from "./routes/post/login-controller"
+import signUpController from "./routes/post/signup-controller"
 
 const app = express()
-app.use(bodyParser.json())
+app.use(express.json())
 app.use(corsMiddleware)
 app.use(basicAuthMiddleware)
 app.use("/visual/admin", express.static(__dirname + "/static/admin"))
 
 if (DEBUG) {
-	morganBody(app, { maxBodyLength: MAX_LOGS_CHARS })
+	app.use(
+		expressWinston.logger({
+			requestFilter: (req: expressWinston.FilterRequest, propName: string) => {
+				switch (propName) {
+					case "headers":
+						return { "user-agent": req.headers["user-agent"] }
+					default:
+						return req[propName]
+				}
+			},
+			transports: [new winston.transports.Console()],
+			format: winston.format.combine(
+				winston.format.colorize(),
+				winston.format.simple()
+			),
+			meta: true,
+			colorize: true
+		})
+	)
 }
 
 const server =
@@ -56,33 +73,33 @@ server.listen(serverPort, () => {
 app.get("/", rootController)
 
 /**
- * Route: /signup
+ * Route: /auth/signup
  * Method: POST
  * Description: Sign up a user
  * Params: `email`, `password`
  */
-app.post("/signup", signUpController)
+app.post("/auth/signup", signUpController)
 
 /**
- * Route: /login
+ * Route: /auth/login
  * Method: POST
  * Description: Log in a user
  * Params: `email`, `password`
  */
-app.post("/login", loginController)
+app.post("/auth/login", loginController)
 
 /**
- * Route: /forgot-password
+ * Route: /auth/forgot-password
  * Method: POST
  * Description: Send a reset password link
  * Params: `email`
  */
-app.post("/forgot-password", forgotPasswordController)
+app.post("/auth/forgot-password", forgotPasswordController)
 
 /**
- * Route: /forgot-password/update
+ * Route: /auth/forgot-password/update
  * Method: POST
  * Description: Update the password from the reset link
  * Params: `password`
  */
-app.post("/forgot-password/update", forgotPasswordUpdateController)
+app.post("/auth/forgot-password/update", forgotPasswordUpdateController)

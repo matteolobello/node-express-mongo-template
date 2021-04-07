@@ -1,3 +1,4 @@
+import { getModelForClass } from "@typegoose/typegoose"
 import * as mongoose from "mongoose"
 import { DATABASE_URI } from "../helpers/constants"
 import UserSchema from "./schemas/user"
@@ -9,4 +10,4 @@ mongoose.connect(DATABASE_URI, {
 	useFindAndModify: false
 })
 
-export const User = mongoose.model("User", UserSchema)
+export const User = getModelForClass(UserSchema)
