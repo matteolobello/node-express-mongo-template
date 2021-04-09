@@ -17,12 +17,18 @@ This repo contains:
 
 ### Run live-server (dev mode)
 
-`npm run dev`
+```bash
+$ npm run dev
+```
 
 ### Compile TypeScript
 
-`npm run build`
+```bash
+$ npm run build
+```
 
 ### Deploy on Docker
 
-`npm run deploy`
+```bash
+$ npm run deploy
+```
