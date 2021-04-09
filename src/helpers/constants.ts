@@ -1,3 +1,6 @@
+import * as dotenv from "dotenv"
+dotenv.config()
+
 export const enum Errors {
 	UNKNOWN = "UNKNOWN",
 	INVALID_INPUT = "INVALID INPUT",

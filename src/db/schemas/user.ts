@@ -1,6 +1,6 @@
 import { prop } from "@typegoose/typegoose"
 
-export default class User {
+export default class UserSchema {
 	@prop({
 		type: String,
 		unique: true,

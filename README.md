@@ -1,23 +1,28 @@
-# TypeScript Backend Template
+# Backend Project Boilerplate
 
-1. NodeJS + TypeScript
-2. Express
-3. JWT
-4. Bcrypt
-5. SSL
-6. MongoDB
-7. TypeGoose
-8. Login + Sign Up + Forgot Password
+This repo contains:
+
+1. Node.js
+2. TypeScript
+3. Express
+4. JWT
+5. Bcrypt
+6. SSL
+7. MongoDB (Mongoose + TypeGoose)
+8. Login + Sign Up + Forgot Password routes
 9. CORS
-10. BasicAuth-protected directories
+10. Basic Auth-protected routes
 11. Live Server with Hot Reloading
 12. Docker + Docker Compose
 
 ### Run live-server (dev mode)
+
 `npm run dev`
 
 ### Compile TypeScript
+
 `npm run build`
 
 ### Deploy on Docker
+
 `npm run deploy`

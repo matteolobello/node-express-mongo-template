@@ -1,12 +1,14 @@
-import * as dotenv from "dotenv"
-dotenv.config()
-
 import * as express from "express"
 import * as expressWinston from "express-winston"
 import * as fileSystem from "fs"
 import * as http from "http"
 import * as https from "https"
 import * as winston from "winston"
+import getRootController from "./controllers/get/get-root-controller"
+import postAuthForgotPasswordController from "./controllers/post/post-auth-forgot-password-controller"
+import postAuthForgotPasswordUpdateController from "./controllers/post/post-auth-forgot-password-update-controller"
+import postAuthLoginController from "./controllers/post/post-auth-login-controller"
+import postAuthSignUpController from "./controllers/post/post-auth-signup-controller"
 import {
 	DEBUG,
 	SERVER_PORT,
@@ -15,11 +17,6 @@ import {
 } from "./helpers/constants"
 import basicAuthMiddleware from "./middlewares/basic-auth-middleware"
 import corsMiddleware from "./middlewares/cors-middleware"
-import rootController from "./routes/get/root-controller"
-import forgotPasswordController from "./routes/post/forgot-password-controller"
-import forgotPasswordUpdateController from "./routes/post/forgot-password-update-controller"
-import loginController from "./routes/post/login-controller"
-import signUpController from "./routes/post/signup-controller"
 
 const app = express()
 app.use(express.json())
@@ -70,7 +67,7 @@ server.listen(serverPort, () => {
  * Description: Shows a JSON Object with the status of the server
  * Params: none
  */
-app.get("/", rootController)
+app.get("/", getRootController)
 
 /**
  * Route: /auth/signup
@@ -78,7 +75,7 @@ app.get("/", rootController)
  * Description: Sign up a user
  * Params: `email`, `password`
  */
-app.post("/auth/signup", signUpController)
+app.post("/auth/signup", postAuthSignUpController)
 
 /**
  * Route: /auth/login
@@ -86,7 +83,7 @@ app.post("/auth/signup", signUpController)
  * Description: Log in a user
  * Params: `email`, `password`
  */
-app.post("/auth/login", loginController)
+app.post("/auth/login", postAuthLoginController)
 
 /**
  * Route: /auth/forgot-password
@@ -94,7 +91,7 @@ app.post("/auth/login", loginController)
  * Description: Send a reset password link
  * Params: `email`
  */
-app.post("/auth/forgot-password", forgotPasswordController)
+app.post("/auth/forgot-password", postAuthForgotPasswordController)
 
 /**
  * Route: /auth/forgot-password/update
@@ -102,4 +99,4 @@ app.post("/auth/forgot-password", forgotPasswordController)
  * Description: Update the password from the reset link
  * Params: `password`
  */
-app.post("/auth/forgot-password/update", forgotPasswordUpdateController)
+app.post("/auth/forgot-password/update", postAuthForgotPasswordUpdateController)
