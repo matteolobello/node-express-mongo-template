@@ -18,7 +18,7 @@ export default (req: express.Request, res: express.Response) => {
 			})
 		})
 		.catch((error) => {
-			res.status(Responses.OK).json({
+			res.status(Responses.INTERNAL_SERVER_ERROR).json({
 				success: false,
 				error
 			})

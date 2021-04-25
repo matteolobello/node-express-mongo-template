@@ -21,7 +21,6 @@ export default class AuthManager {
 	}
 
 	private constructor() {
-		throw new Error("Call the AuthManager.getInstance() method instead")
 	}
 
 	signUp(email: string, password: string) {

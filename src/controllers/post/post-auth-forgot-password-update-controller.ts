@@ -15,20 +15,20 @@ export default (req: express.Request, res: express.Response) => {
 	authManager
 		.fetchUserByHeaderToken(req)
 		.then((user: any) => {
-			;(user.password = authManager.encryptPassword(req.body.password)),
-				user
-					.save()
-					.then(() => {
-						res.status(Responses.OK).json({
-							success: true
-						})
+			user.password = authManager.encryptPassword(req.body.password)
+			user
+				.save()
+				.then(() => {
+					res.status(Responses.OK).json({
+						success: true
 					})
-					.catch((err: any) => {
-						res.status(Responses.INTERNAL_SERVER_ERROR).json({
-							success: false,
-							error: err
-						})
+				})
+				.catch((err: any) => {
+					res.status(Responses.INTERNAL_SERVER_ERROR).json({
+						success: false,
+						error: err
 					})
+				})
 		})
 		.catch((err: any) => {
 			res.status(Responses.INTERNAL_SERVER_ERROR).json({

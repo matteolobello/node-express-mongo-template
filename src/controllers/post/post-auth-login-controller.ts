@@ -17,10 +17,10 @@ export default (req: express.Request, res: express.Response) => {
 				token: data.token
 			})
 		})
-		.catch((err) => {
-			res.status(Responses.OK).json({
+		.catch((error) => {
+			res.status(Responses.INTERNAL_SERVER_ERROR).json({
 				success: false,
-				error: err
+				error
 			})
 		})
 }
