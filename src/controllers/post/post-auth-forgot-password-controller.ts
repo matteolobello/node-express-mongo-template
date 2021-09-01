@@ -3,20 +3,25 @@ import * as nodeMailer from "nodemailer"
 import * as Database from "../../db/db"
 import AuthManager from "../../helpers/auth"
 import {
-	Responses,
-	Errors,
-	WEB_APP_URL,
+	EMAIL_PASS,
 	EMAIL_SERVER_PORT,
 	EMAIL_USER,
-	EMAIL_PASS,
+	Errors,
+	FORGOT_PASSWORD_NOREPLY_EMAIL,
 	PROJECT_NAME,
-	FORGOT_PASSWORD_NOREPLY_EMAIL
+	Responses,
+	WEB_APP_URL
 } from "../../helpers/constants"
 
+interface Params {
+	email: string
+}
+
 export default (req: express.Request, res: express.Response) => {
+	const params = req.body as Params
+
 	let isInputValid =
-		req.body.email &&
-		new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]+$/).test(req.body.email)
+		params && new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]+$/).test(params.email)
 	if (!isInputValid) {
 		return res.status(Responses.BAD_REQUEST).json({
 			success: false,
@@ -24,28 +29,27 @@ export default (req: express.Request, res: express.Response) => {
 		})
 	}
 
-	Database.User.findOne({ email: req.body.email })
-		.then((user: any) => {
+	Database.Users.findOne({ email: params.email })
+		.then((user) => {
 			const jwt = AuthManager.getInstance().generateToken(
 				{ _id: user._id, email: user.email },
 				"1d"
 			)
 			const passwordResetLink = `${WEB_APP_URL}/reset-password/${jwt}`
 
-			let transporter = nodeMailer.createTransport({
-				service: "gmail",
-				host: EMAIL_SERVER_PORT,
-				port: Number(EMAIL_SERVER_PORT) || 0,
-				secure: EMAIL_SERVER_PORT == "465",
-				auth: {
-					user: EMAIL_USER,
-					pass: EMAIL_PASS
-				},
-				debug: false,
-				logger: false
-			})
-
-			transporter
+			nodeMailer
+				.createTransport({
+					service: "gmail",
+					host: EMAIL_SERVER_PORT,
+					port: Number(EMAIL_SERVER_PORT) || 0,
+					secure: EMAIL_SERVER_PORT == "465",
+					auth: {
+						user: EMAIL_USER,
+						pass: EMAIL_PASS
+					},
+					debug: false,
+					logger: false
+				})
 				.sendMail({
 					from: `"${PROJECT_NAME}" <${FORGOT_PASSWORD_NOREPLY_EMAIL}>`,
 					to: user.email,

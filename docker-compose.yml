@@ -4,8 +4,6 @@ services:
     container_name: backend-app
     restart: always
     build: .
-    env_file:
-        - docker.env
     ports:
-        - "80:80"
-        - "443:443"
+      - "80:80"
+      - "443:443"

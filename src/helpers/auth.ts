@@ -1,7 +1,10 @@
+import { DocumentType } from "@typegoose/typegoose"
 import * as bcrypt from "bcryptjs"
+import * as express from "express"
 import * as jsonWebToken from "jsonwebtoken"
 import * as sanitizer from "sanitize-html"
 import * as Database from "../db/db"
+import UserSchema from "../db/schemas/user"
 import { Errors, JWT_CODE_EXPIRATION, SECRET_JWT_CODE } from "./constants"
 
 interface TokenPayload {
@@ -20,30 +23,32 @@ export default class AuthManager {
 		return AuthManager.instance
 	}
 
-	private constructor() {
-	}
+	private constructor() {}
 
-	signUp(email: string, password: string) {
+	signUp(email: string, password: string): Promise<string> {
 		return new Promise((resolve, reject) => {
-			Database.User.create({
+			Database.Users.create({
 				email: email,
 				password: this.encryptPassword(password)
 			})
-				.then((user: any) => {
+				.then((user) => {
 					const token = this.generateToken({ _id: user._id, email: user.email })
 					resolve(token)
 				})
-				.catch((err: any) => {
-					if (err.code === 11000) reject(Errors.DUPLICATED_RECORD)
-					else reject(Errors.UNKNOWN)
+				.catch((err) => {
+					if (err.code === 11000) {
+						reject(Errors.DUPLICATED_RECORD)
+					} else {
+						reject(Errors.UNKNOWN)
+					}
 				})
 		})
 	}
 
-	signIn(email: string, password: string) {
+	signIn(email: string, password: string): Promise<string> {
 		return new Promise((resolve, reject) => {
-			Database.User.findOne({ email })
-				.then((user: any) => {
+			Database.Users.findOne({ email })
+				.then((user) => {
 					if (!user) {
 						reject(Errors.RECORD_NOT_FOUND)
 					} else {
@@ -54,36 +59,45 @@ export default class AuthManager {
 								_id: user._id,
 								email: user.email
 							})
-							resolve({ token, userType: user.userType })
+							resolve(token)
 						}
 					}
 				})
-				.catch((err: any) => {
+				.catch(() => {
 					reject(Errors.UNKNOWN)
 				})
 		})
 	}
 
-	encryptPassword(password: string): any {
+	encryptPassword(password: string): string {
 		return bcrypt.hashSync(password, 10)
 	}
 
-	fetchUserByHeaderToken(req: any) {
-		if (req.headers && req.headers.authorization) {
-			const authorization = sanitizer(req.headers.authorization)
-			if (!authorization.includes("Bearer")) {
-				return
+	fetchUserByHeaderToken(
+		req: express.Request
+	): Promise<DocumentType<UserSchema>> {
+		return new Promise(async (resolve, reject) => {
+			if (req.headers && req.headers.authorization) {
+				const authorization = sanitizer(req.headers.authorization)
+				if (!authorization.includes("Bearer")) {
+					return reject(Errors.BAD_AUTHENTICATION)
+				}
+
+				const [_, token] = authorization.split("Bearer")
+
+				try {
+					const user = this.fetchUserByToken(token.trim())
+					resolve(user)
+				} catch (err) {
+					reject(err)
+				}
 			}
 
-			const [_, token] = authorization.split("Bearer")
-
-			return this.fetchUserByToken(token.trim())
-		}
-
-		return Promise.reject(Errors.AUTH_TOKEN_NOT_FOUND)
+			return reject(Errors.AUTH_TOKEN_NOT_FOUND)
+		})
 	}
 
-	fetchUserByToken(token: string) {
+	fetchUserByToken(token: string): Promise<DocumentType<UserSchema>> {
 		return new Promise((resolve, reject) => {
 			const decoded = this.decodeJWT(token)
 
@@ -93,25 +107,23 @@ export default class AuthManager {
 				return
 			}
 
-			Database.User.findById(userId)
-				.then((user: any) => {
-					resolve(user)
-				})
-				.catch((err) => {
+			Database.Users.findById(userId)
+				.then(resolve)
+				.catch(() => {
 					reject(Errors.RECORD_NOT_FOUND)
 				})
 		})
 	}
 
-	generateToken(tokenPayload: TokenPayload, exp = JWT_CODE_EXPIRATION) {
+	generateToken(tokenPayload: TokenPayload, exp = JWT_CODE_EXPIRATION): string {
 		return jsonWebToken.sign(tokenPayload, SECRET_JWT_CODE, { expiresIn: exp })
 	}
 
-	private decodeJWT(token: string): any {
+	private decodeJWT(token: string): TokenPayload | undefined {
 		try {
-			return jsonWebToken.verify(token, SECRET_JWT_CODE)
+			return jsonWebToken.verify(token, SECRET_JWT_CODE) as TokenPayload
 		} catch (e) {
-			return null
+			return undefined
 		}
 	}
 }

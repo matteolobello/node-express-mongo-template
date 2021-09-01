@@ -5,16 +5,18 @@ import { Errors, Responses } from "../../helpers/constants"
 
 export default (req: express.Request, res: express.Response) => {
 	if (!req.body.email || !req.body.password) {
-		res.json({ success: false, error: Errors.INVALID_INPUT })
+		res
+			.status(Responses.BAD_REQUEST)
+			.json({ success: false, error: Errors.INVALID_INPUT })
 		return
 	}
 
 	AuthManager.getInstance()
 		.signIn(sanitizer(req.body.email), req.body.password)
-		.then((data: any) => {
+		.then((token) => {
 			res.status(Responses.OK).json({
 				success: true,
-				token: data.token
+				token
 			})
 		})
 		.catch((error) => {

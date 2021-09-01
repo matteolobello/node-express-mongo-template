@@ -1,9 +1,15 @@
 import * as express from "express"
 import AuthManager from "../../helpers/auth"
-import { Responses, Errors } from "../../helpers/constants"
+import { Errors, Responses } from "../../helpers/constants"
+
+interface Params {
+	password: string
+}
 
 export default (req: express.Request, res: express.Response) => {
-	if (!req.body.password || req.body.password.length < 6) {
+	const params = req.body as Params
+
+	if (!params || params.password.length < 6) {
 		return res.status(Responses.BAD_REQUEST).json({
 			success: false,
 			error: Errors.INVALID_INPUT
@@ -14,7 +20,7 @@ export default (req: express.Request, res: express.Response) => {
 
 	authManager
 		.fetchUserByHeaderToken(req)
-		.then((user: any) => {
+		.then((user) => {
 			user.password = authManager.encryptPassword(req.body.password)
 			user
 				.save()
@@ -23,17 +29,17 @@ export default (req: express.Request, res: express.Response) => {
 						success: true
 					})
 				})
-				.catch((err: any) => {
+				.catch((error) => {
 					res.status(Responses.INTERNAL_SERVER_ERROR).json({
 						success: false,
-						error: err
+						error
 					})
 				})
 		})
-		.catch((err: any) => {
+		.catch((error) => {
 			res.status(Responses.INTERNAL_SERVER_ERROR).json({
 				success: false,
-				error: err
+				error
 			})
 		})
 }

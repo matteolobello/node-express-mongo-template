@@ -10,4 +10,6 @@ mongoose.connect(DATABASE_URI, {
 	useFindAndModify: false
 })
 
-export const User = getModelForClass(UserSchema)
+export const Users = getModelForClass(UserSchema, {
+	schemaOptions: { collection: "Users" }
+})

@@ -1,11 +1,10 @@
 import * as basicAuth from "basic-auth"
+import * as express from "express"
 import {
 	BASIC_AUTH_PASS,
 	BASIC_AUTH_USER,
 	Responses
 } from "../helpers/constants"
-
-import * as express from "express"
 
 const basicAuthProtectedPaths = ["/visual/admin"]
 
@@ -14,9 +13,9 @@ export default (
 	res: express.Response,
 	next: Function
 ) => {
-	const isProtectedPath =
-		basicAuthProtectedPaths.find((path) => req.path.startsWith(path)) !=
-		undefined
+	const isProtectedPath = basicAuthProtectedPaths.some((path) =>
+		req.path.startsWith(path)
+	)
 
 	if (!isProtectedPath) {
 		return next()
