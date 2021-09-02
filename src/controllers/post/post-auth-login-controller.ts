@@ -1,16 +1,21 @@
+import { IsEmail, IsString } from "class-validator"
 import * as express from "express"
 import * as sanitizer from "sanitize-html"
 import AuthManager from "../../helpers/auth"
-import { Errors, Responses } from "../../helpers/constants"
+import { Responses } from "../../helpers/constants"
 
-export default (req: express.Request, res: express.Response) => {
-	if (!req.body.email || !req.body.password) {
-		res
-			.status(Responses.BAD_REQUEST)
-			.json({ success: false, error: Errors.INVALID_INPUT })
-		return
-	}
+export class BodyParams {
+	@IsEmail()
+	email: string
 
+	@IsString()
+	password: string
+}
+
+export const handle = (
+	req: express.Request<any, any, BodyParams, any>,
+	res: express.Response
+) => {
 	AuthManager.getInstance()
 		.signIn(sanitizer(req.body.email), req.body.password)
 		.then((token) => {

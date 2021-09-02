@@ -1,3 +1,4 @@
+import { IsEmail } from "class-validator"
 import * as express from "express"
 import * as nodeMailer from "nodemailer"
 import * as Database from "../../db/db"
@@ -13,15 +14,17 @@ import {
 	WEB_APP_URL
 } from "../../helpers/constants"
 
-interface Params {
+export class BodyParams {
+	@IsEmail()
 	email: string
 }
 
-export default (req: express.Request, res: express.Response) => {
-	const params = req.body as Params
-
-	let isInputValid =
-		params && new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]+$/).test(params.email)
+export const handle = (
+	req: express.Request<any, any, BodyParams, any>,
+	res: express.Response
+) => {
+	const isInputValid =
+		req.body && new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]+$/).test(req.body.email)
 	if (!isInputValid) {
 		return res.status(Responses.BAD_REQUEST).json({
 			success: false,
@@ -29,7 +32,7 @@ export default (req: express.Request, res: express.Response) => {
 		})
 	}
 
-	Database.Users.findOne({ email: params.email })
+	Database.Users.findOne({ email: req.body.email })
 		.then((user) => {
 			const jwt = AuthManager.getInstance().generateToken(
 				{ _id: user._id, email: user.email },

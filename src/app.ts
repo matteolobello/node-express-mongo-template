@@ -2,17 +2,18 @@ import * as express from "express"
 import * as fileSystem from "fs"
 import * as http from "http"
 import * as https from "https"
-import getRootController from "./controllers/get/get-root-controller"
-import postAuthForgotPasswordController from "./controllers/post/post-auth-forgot-password-controller"
-import postAuthForgotPasswordUpdateController from "./controllers/post/post-auth-forgot-password-update-controller"
-import postAuthLoginController from "./controllers/post/post-auth-login-controller"
-import postAuthSignUpController from "./controllers/post/post-auth-signup-controller"
+import * as GetRootController from "./controllers/get/get-root-controller"
+import * as PostAuthForgotPasswordController from "./controllers/post/post-auth-forgot-password-controller"
+import * as PostAuthForgotPasswordUpdateController from "./controllers/post/post-auth-forgot-password-update-controller"
+import * as PostAuthLoginController from "./controllers/post/post-auth-login-controller"
+import * as PostAuthSignUpController from "./controllers/post/post-auth-signup-controller"
 import {
 	DEBUG,
 	SERVER_PORT,
 	SERVER_SSL_CERTIFICATE_PATH,
 	SERVER_SSL_KEY_PATH
 } from "./helpers/constants"
+import { makeValidateBody } from "./helpers/express-class-validator"
 import basicAuthMiddleware from "./middlewares/basic-auth-middleware"
 import corsMiddleware from "./middlewares/cors-middleware"
 import loggerMiddleware from "./middlewares/logger-middleware"
@@ -42,9 +43,25 @@ server.listen(serverPort, () => {
 	console.log(`Running server on port ${serverPort}`)
 })
 
-app.get("/", getRootController)
+app.get("/", GetRootController.handle)
 
-app.post("/auth/signup", postAuthSignUpController)
-app.post("/auth/login", postAuthLoginController)
-app.post("/auth/forgot-password", postAuthForgotPasswordController)
-app.post("/auth/forgot-password/update", postAuthForgotPasswordUpdateController)
+app.post(
+	"/auth/signup",
+	makeValidateBody(PostAuthSignUpController.BodyParams),
+	PostAuthSignUpController.handle
+)
+app.post(
+	"/auth/login",
+	makeValidateBody(PostAuthLoginController.BodyParams),
+	PostAuthLoginController.handle
+)
+app.post(
+	"/auth/forgot-password",
+	makeValidateBody(PostAuthForgotPasswordController.BodyParams),
+	PostAuthForgotPasswordController.handle
+)
+app.post(
+	"/auth/forgot-password/update",
+	makeValidateBody(PostAuthForgotPasswordUpdateController.BodyParams),
+	PostAuthForgotPasswordUpdateController.handle
+)
