@@ -39,6 +39,6 @@
 		"@types/nodemailer-direct-transport": "^1.0.31",
 		"@types/nodemailer-smtp-transport": "^2.7.4",
 		"@types/sanitize-html": "^1.23.0",
-		"ts-node-dev": "^1.0.0-pre.44"
+		"ts-node-dev": "^1.1.8"
 	}
 }
