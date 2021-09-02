@@ -23,7 +23,7 @@
 		"jsonwebtoken": "^8.5.1",
 		"mongoose": "^5.10.18",
 		"nodemailer": "^6.4.8",
-		"sanitize-html": "^1.25.0",
+		"sanitize-html": "^2.3.2",
 		"typegoose": "^5.9.1",
 		"typescript": "^3.9.3"
 	},
