@@ -16,8 +16,6 @@ export const handle = async (
 	req: express.Request<any, any, BodyParams, any>,
 	res: express.Response
 ) => {
-	console.log("Handling...")
-
 	AuthManager.getInstance()
 		.signUp(sanitizer(req.body.email), req.body.password)
 		.then((token) => {
