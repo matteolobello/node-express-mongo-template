@@ -13,7 +13,6 @@ import {
 	SERVER_SSL_CERTIFICATE_PATH,
 	SERVER_SSL_KEY_PATH
 } from "./helpers/constants"
-import { makeValidateBody } from "./helpers/express-class-validator"
 import basicAuthMiddleware from "./middlewares/basic-auth-middleware"
 import corsMiddleware from "./middlewares/cors-middleware"
 import loggerMiddleware from "./middlewares/logger-middleware"
@@ -45,23 +44,10 @@ server.listen(serverPort, () => {
 
 app.get("/", GetRootController.handle)
 
-app.post(
-	"/auth/signup",
-	makeValidateBody(PostAuthSignUpController.BodyParams),
-	PostAuthSignUpController.handle
-)
-app.post(
-	"/auth/login",
-	makeValidateBody(PostAuthLoginController.BodyParams),
-	PostAuthLoginController.handle
-)
-app.post(
-	"/auth/forgot-password",
-	makeValidateBody(PostAuthForgotPasswordController.BodyParams),
-	PostAuthForgotPasswordController.handle
-)
+app.post("/auth/signup", PostAuthSignUpController.handle)
+app.post("/auth/login", PostAuthLoginController.handle)
+app.post("/auth/forgot-password", PostAuthForgotPasswordController.handle)
 app.post(
 	"/auth/forgot-password/update",
-	makeValidateBody(PostAuthForgotPasswordUpdateController.BodyParams),
 	PostAuthForgotPasswordUpdateController.handle
 )

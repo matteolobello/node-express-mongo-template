@@ -9,7 +9,6 @@ import { Errors, JWT_CODE_EXPIRATION, SECRET_JWT_CODE } from "./constants"
 
 interface TokenPayload {
 	_id: string
-	email: string
 }
 
 export default class AuthManager {
@@ -25,14 +24,14 @@ export default class AuthManager {
 
 	private constructor() {}
 
-	signUp(email: string, password: string): Promise<string> {
-		return new Promise((resolve, reject) => {
+	signUp(email: string, password: string) {
+		return new Promise<string>((resolve, reject) => {
 			Database.Users.create({
 				email: email,
 				password: this.encryptPassword(password)
 			})
 				.then((user) => {
-					const token = this.generateToken({ _id: user._id, email: user.email })
+					const token = this.generateToken({ _id: user._id })
 					resolve(token)
 				})
 				.catch((err) => {
@@ -45,8 +44,8 @@ export default class AuthManager {
 		})
 	}
 
-	signIn(email: string, password: string): Promise<string> {
-		return new Promise((resolve, reject) => {
+	signIn(email: string, password: string) {
+		return new Promise<string>((resolve, reject) => {
 			Database.Users.findOne({ email })
 				.then((user) => {
 					if (!user) {
@@ -56,8 +55,7 @@ export default class AuthManager {
 							reject(Errors.BAD_AUTHENTICATION)
 						} else {
 							const token = this.generateToken({
-								_id: user._id,
-								email: user.email
+								_id: user._id
 							})
 							resolve(token)
 						}
@@ -69,14 +67,12 @@ export default class AuthManager {
 		})
 	}
 
-	encryptPassword(password: string): string {
+	encryptPassword(password: string) {
 		return bcrypt.hashSync(password, 10)
 	}
 
-	fetchUserByHeaderToken(
-		req: express.Request
-	): Promise<DocumentType<UserSchema>> {
-		return new Promise(async (resolve, reject) => {
+	fetchUserByHeaderToken(req: express.Request) {
+		return new Promise<DocumentType<UserSchema>>(async (resolve, reject) => {
 			if (req.headers && req.headers.authorization) {
 				const authorization = sanitizer(req.headers.authorization)
 				if (!authorization.includes("Bearer")) {
@@ -97,8 +93,8 @@ export default class AuthManager {
 		})
 	}
 
-	fetchUserByToken(token: string): Promise<DocumentType<UserSchema>> {
-		return new Promise((resolve, reject) => {
+	fetchUserByToken(token: string) {
+		return new Promise<DocumentType<UserSchema>>((resolve, reject) => {
 			const decoded = this.decodeJWT(token)
 
 			const userId = decoded?._id
@@ -115,11 +111,11 @@ export default class AuthManager {
 		})
 	}
 
-	generateToken(tokenPayload: TokenPayload, exp = JWT_CODE_EXPIRATION): string {
+	generateToken(tokenPayload: TokenPayload, exp = JWT_CODE_EXPIRATION) {
 		return jsonWebToken.sign(tokenPayload, SECRET_JWT_CODE, { expiresIn: exp })
 	}
 
-	private decodeJWT(token: string): TokenPayload | undefined {
+	private decodeJWT(token: string) {
 		try {
 			return jsonWebToken.verify(token, SECRET_JWT_CODE) as TokenPayload
 		} catch (e) {

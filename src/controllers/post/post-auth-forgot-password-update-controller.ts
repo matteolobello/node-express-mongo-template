@@ -1,18 +1,10 @@
-import { IsString } from "class-validator"
 import * as express from "express"
 import AuthManager from "../../helpers/auth"
 import { Errors, Responses } from "../../helpers/constants"
 
-export class BodyParams {
-	@IsString()
-	password: string
-}
-
-export const handle = (
-	req: express.Request<any, any, BodyParams, any>,
-	res: express.Response
-) => {
-	if (req.body.password.length < 6) {
+export const handle = (req: express.Request, res: express.Response) => {
+	const isValidInput = req.body.password && req.body.password.length > 5
+	if (!isValidInput) {
 		return res.status(Responses.BAD_REQUEST).json({
 			success: false,
 			error: Errors.INVALID_INPUT
